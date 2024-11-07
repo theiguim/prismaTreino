@@ -8,29 +8,26 @@ export class LeadsCampaignController {
     getLead: Handler = async (req, res, nest) => {
         try {
 
-            const query = req.query;
-            const { page = "1", pageSize = "10", name, status, sortBy = "name", order = "asc" } = query;
+        const query = req.query;
+        const {page ="1", pageSize="10", name, status, sortBy="name", order = "asc"} = query;
 
-            const pageNumber = +page;
-            const pageSizeNumber = +pageSize;
+        const pageNumber = +page;
+        const pageNumberSize = +pageNumber
 
-            const where: Prisma.LeadWhereInput = {
-                campaings: {
-                    some: {
-                        campaignId: +req.params.campaignId,
-                    }
-                }
-            };
+        const where: Prisma.LeadWhereInput = {
+            campaings:{
+                some:{campaignId: +req.params.campaignId}
+            }
+        }
 
-            if (name) where.name = { contains: String(name), mode: "insensitive" }
-            if (status) where.campaings = { some: { campaignId: +req.params.campaignId, status: status as LeadCampaignStatus } }
-
+        if(name) where.name = {contains: name as string, mode: "insensitive"};
+        if(status) where.campaings = {some: {campaignId: +req.params.campaignId, status: status as LeadCampaignStatus}}
 
             const getLead = await prisma.lead.findMany({
                 where,
-                orderBy: { [sortBy as string]: order === "asc" ? "asc" : "desc" },
-                skip: (pageNumber - 1) * pageSizeNumber,
-                take: pageSizeNumber,
+                orderBy: {[sortBy as string]: order},
+                skip: (pageNumber -1) * pageNumberSize,
+                take: pageNumberSize,
                 include: {
                     campaings: true
                 }

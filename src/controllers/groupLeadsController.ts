@@ -7,26 +7,26 @@ export class GroupLeadsController {
 
     getLeads: Handler = async (req, res, next) => {
         try {
-            const query = req.query
-            const { page = "1", pageSize = "10", name, status, sortBy = "name", order = "asc" } = query
+        const query = req.query;
+        const {page = "1", pageSize="10", name, status, sortBy = "name", order= "asc"} = query;
+        const pageNumber = +page
+        const pageSizeNumber = +pageSize;
 
-            const pageNumber = +page
-            const pageSizeNumber = +pageSize;
-
-            const where: Prisma.LeadWhereInput = {
-                groups:{
-                    some : {id: +req.params.groupId}
-                }
+        // quero que FINDMANY apenas dos Leads que estejam dentro do GroupID
+        const where: Prisma.LeadWhereInput ={
+            groups :{
+              some: {id: +req.params.groupId}
             }
+        };
 
-            if(name) where.name = {contains: name as string, mode:"insensitive"};
-            if(status) where.status = status as LeadStatus
+        if(name) where.name = {contains: name as string, mode: "insensitive"};
+        if(status) where.status = status as LeadStatus
 
             const getLeads = await prisma.lead.findMany({
                 where,
-                orderBy: {[sortBy as string]: order === "asc" ? "asc" : "desc"},
-                skip: (pageNumber -1)* pageSizeNumber,
-                take: pageSizeNumber, 
+                orderBy: {[sortBy as string]: order === "asc"? "asc":"desc"},
+                skip: (pageNumber -1) *pageSizeNumber,
+                take: pageSizeNumber,
                 include: {
                     groups:true
                 }
